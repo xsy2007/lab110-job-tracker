@@ -18,7 +18,9 @@
     <a href="/filters">筛选</a>
     <a href="/follows">关注</a>
     <a href="/activity">动态</a>
+    {% if user and user.role == 'maintainer' %}
     <a href="/maintenance">维护</a>
+    {% endif %}
     {% if user %}
       <span>当前用户：{{ user.username }} ({{ user.role }})</span>
       <a href="/logout">退出</a>

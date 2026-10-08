@@ -8,10 +8,10 @@ _DEFAULT_USERS = [
     ("maintainer", "maintainer", "maintainer"),
 ]
 
-# Two real sources: a real recruitment platform and a real big-company official site.
+# One real big-company official site + one real public recruitment platform.
 _DEFAULT_SOURCES = [
-    ("拉勾网", "platform", "https://www.lagou.com", "lagou"),
-    ("字节跳动招聘", "company", "https://jobs.bytedance.com", "bytedance"),
+    ("腾讯招聘", "company", "https://careers.tencent.com", "tencent"),
+    ("LinkedIn", "platform", "https://www.linkedin.com/jobs", "linkedin"),
 ]
 
 

@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from .config import SECRET_KEY
 from .db import init_db
+from .deps import NotAuthenticatedError
 from .routers import activity, auth, filters, follows, jobs, maintenance
 from .seed import seed_defaults
 
@@ -21,6 +22,10 @@ def create_app() -> FastAPI:
     app.include_router(follows.router)
     app.include_router(activity.router)
     app.include_router(maintenance.router)
+
+    @app.exception_handler(NotAuthenticatedError)
+    async def _not_auth(request, exc):
+        return RedirectResponse("/login", status_code=303)
 
     @app.get("/")
     def root():

@@ -5,13 +5,18 @@ from .db import get_db
 from .models import User
 
 
+class NotAuthenticatedError(Exception):
+    """Raised when a protected route is hit without a valid session."""
+
+
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     user_id = request.session.get("user_id")
     if user_id is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise NotAuthenticatedError()
     user = db.get(User, user_id)
     if user is None:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        request.session.clear()
+        raise NotAuthenticatedError()
     return user
 
 

@@ -142,7 +142,8 @@ class CollectionRun(Base):
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="RUNNING", nullable=False)  # RUNNING | SUCCESS | FAILED
     is_baseline: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    jobs_seen: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    jobs_added: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    jobs_updated: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    updated_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    unchanged_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    failed_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
