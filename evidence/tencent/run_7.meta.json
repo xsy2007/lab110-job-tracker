@@ -1,0 +1,14 @@
+{
+  "run_id": 7,
+  "source_id": 1,
+  "source": "腾讯招聘",
+  "collector": "tencent",
+  "started_at": "2026-10-08T19:47:21.843298",
+  "finished_at": "2026-10-08T19:47:22.586402",
+  "status": "SUCCESS",
+  "created": 0,
+  "updated": 0,
+  "unchanged": 15,
+  "failed": 0,
+  "error": null
+}

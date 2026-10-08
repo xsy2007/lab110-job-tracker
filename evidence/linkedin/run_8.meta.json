@@ -1,0 +1,14 @@
+{
+  "run_id": 8,
+  "source_id": 2,
+  "source": "LinkedIn",
+  "collector": "linkedin",
+  "started_at": "2026-10-08T19:47:22.590921",
+  "finished_at": "2026-10-08T19:47:24.285832",
+  "status": "SUCCESS",
+  "created": 0,
+  "updated": 0,
+  "unchanged": 10,
+  "failed": 0,
+  "error": null
+}

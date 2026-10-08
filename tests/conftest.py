@@ -8,6 +8,14 @@ from app.models import Source, User
 from app.security import hash_password
 
 
+@pytest.fixture(autouse=True)
+def _isolate_evidence(tmp_path, monkeypatch):
+    """Keep test runs from writing evidence into the real evidence/ directory."""
+    import app.services.collection as collection
+
+    monkeypatch.setattr(collection, "EVIDENCE_DIR", tmp_path / "evidence")
+
+
 @pytest.fixture
 def session_factory(tmp_path):
     engine = create_engine(

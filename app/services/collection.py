@@ -19,6 +19,29 @@ def _fmt(value) -> str:
     return str(value)
 
 
+def _write_meta(source, run) -> None:
+    """Persist source + time + result metadata alongside the raw evidence."""
+    evidence_dir = EVIDENCE_DIR / source.collector
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    meta = {
+        "run_id": run.id,
+        "source_id": source.id,
+        "source": source.name,
+        "collector": source.collector,
+        "started_at": run.started_at.isoformat() if run.started_at else None,
+        "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+        "status": run.status,
+        "created": run.created_count,
+        "updated": run.updated_count,
+        "unchanged": run.unchanged_count,
+        "failed": run.failed_count,
+        "error": run.error_message,
+    }
+    (evidence_dir / f"run_{run.id}.meta.json").write_text(
+        json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
 # Content fields whose change produces a JobChange (before/after).
 _COMPARED_FIELDS = ("title", "description", "requirements", "salary", "status", "deadline")
 
@@ -165,6 +188,7 @@ def run_collection(source_id: int, session_factory=SessionLocal) -> CollectionRu
             run.finished_at = _now()
             db.commit()
             db.refresh(run)
+            _write_meta(source, run)
             return run
 
         # Evidence: raw response body, byte-for-byte, unmodified.
@@ -183,6 +207,7 @@ def run_collection(source_id: int, session_factory=SessionLocal) -> CollectionRu
         run.finished_at = _now()
         db.commit()
         db.refresh(run)
+        _write_meta(source, run)
         return run
     finally:
         db.close()

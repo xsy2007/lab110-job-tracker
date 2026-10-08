@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    container_name: lab110-job-tracker
+    ports:
+      - "8000:8000"
+    volumes:
+      - jobtracker_data:/app/data
+    environment:
+      # Optional proxy, container-reachable (e.g. http://host.docker.internal:7890).
+      # NOT the host's 127.0.0.1 (which points to the container itself).
+      # Set via a gitignored .env file:  LAB110_PROXY=http://host.docker.internal:7890
+      HTTPS_PROXY: ${LAB110_PROXY:-}
+      HTTP_PROXY: ${LAB110_PROXY:-}
+      ALL_PROXY: ${LAB110_PROXY:-}
+    restart: unless-stopped
+
+volumes:
+  jobtracker_data:
