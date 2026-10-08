@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }}{% endblock %}
+{% block content %}
+<h2>{{ job.title }}</h2>
+<p><strong>公司：</strong>{{ job.company }} · <strong>城市：</strong>{{ job.city }} · <strong>状态：</strong>{{ job.status }}</p>
+<p><strong>薪资：</strong>{{ job.salary or '—' }}</p>
+<p><strong>source_job_id：</strong>{{ job.source_job_id }}</p>
+<p><strong>来源：</strong><a href="{{ job.source_url }}" target="_blank">{{ job.source_url }}</a></p>
+<h3>要求</h3>
+<pre>{{ job.requirements or '—' }}</pre>
+<h3>描述</h3>
+<pre>{{ job.description or '—' }}</pre>
+{% endblock %}

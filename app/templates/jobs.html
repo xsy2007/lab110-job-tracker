@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}岗位{% endblock %}
+{% block content %}
+<h2>岗位列表</h2>
+<form method="get" action="/jobs">
+  <input name="q" value="{{ q }}" placeholder="关键词">
+  <input name="city" value="{{ city }}" placeholder="城市">
+  <button type="submit">搜索</button>
+</form>
+<table>
+  <tr><th>ID</th><th>标题</th><th>公司</th><th>城市</th><th>状态</th><th>首次采集</th></tr>
+  {% for j in jobs %}
+  <tr>
+    <td>{{ j.id }}</td>
+    <td><a href="/jobs/{{ j.id }}">{{ j.title }}</a></td>
+    <td>{{ j.company }}</td>
+    <td>{{ j.city }}</td>
+    <td>{{ j.status }}</td>
+    <td>{{ j.first_seen_at }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6">暂无岗位（先运行采集）</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
