@@ -2,5 +2,35 @@
 {% block title %}维护{% endblock %}
 {% block content %}
 <h2>维护</h2>
-<p>（仅 maintainer 可见）来源与采集运行管理将在后续阶段实现。</p>
+<h3>来源</h3>
+<form method="post" action="/maintenance/collect-all" style="margin-bottom:8px">
+  <button type="submit">全部采集</button>
+</form>
+<table>
+  <tr><th>ID</th><th>名称</th><th>类型</th><th>采集器</th><th>操作</th></tr>
+  {% for s in sources %}
+  <tr>
+    <td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.kind }}</td><td>{{ s.collector }}</td>
+    <td><form method="post" action="/maintenance/collect/{{ s.id }}" style="display:inline"><button type="submit">立即采集</button></form></td>
+  </tr>
+  {% endfor %}
+</table>
+<h3>最近采集运行</h3>
+<table>
+  <tr><th>ID</th><th>来源</th><th>状态</th><th>开始</th><th>结束</th><th>created</th><th>updated</th><th>unchanged</th><th>failed</th><th>error</th></tr>
+  {% for r in runs %}
+  <tr>
+    <td>{{ r.id }}</td>
+    <td>{{ source_names.get(r.source_id, r.source_id) }}</td>
+    <td>{{ r.status }}</td>
+    <td>{{ r.started_at.strftime('%m-%d %H:%M:%S') }}</td>
+    <td>{% if r.finished_at %}{{ r.finished_at.strftime('%m-%d %H:%M:%S') }}{% else %}—{% endif %}</td>
+    <td>{{ r.created_count }}</td>
+    <td>{{ r.updated_count }}</td>
+    <td>{{ r.unchanged_count }}</td>
+    <td>{{ r.failed_count }}</td>
+    <td>{{ r.error_message or '' }}</td>
+  </tr>
+  {% endfor %}
+</table>
 {% endblock %}

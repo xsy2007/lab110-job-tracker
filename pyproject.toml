@@ -12,6 +12,7 @@ dependencies = [
     "beautifulsoup4",
     "python-multipart",
     "itsdangerous",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
@@ -25,3 +26,4 @@ package = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]

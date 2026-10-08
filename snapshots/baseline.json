@@ -1,0 +1,5 @@
+[
+  {"source_job_id": "P001", "title": "后端工程师", "company": "甲公司", "city": "北京", "source_url": "https://example.com/jobs/P001", "description": "负责后端服务开发", "requirements": "熟悉 Python", "salary": "20-30k", "status": "OPEN", "deadline": null},
+  {"source_job_id": "P002", "title": "前端工程师", "company": "乙公司", "city": "上海", "source_url": "https://example.com/jobs/P002", "description": "负责前端页面开发", "requirements": "熟悉 React", "salary": "18-25k", "status": "OPEN", "deadline": null},
+  {"source_job_id": "P003", "title": "测试工程师", "company": "丙公司", "city": "深圳", "source_url": "https://example.com/jobs/P003", "description": "负责质量保障", "requirements": "熟悉 pytest", "salary": "15-20k", "status": "OPEN", "deadline": null}
+]

@@ -2,5 +2,24 @@
 {% block title %}筛选{% endblock %}
 {% block content %}
 <h2>筛选条件</h2>
-<p>保存 / 修改 / 删除筛选条件将在后续阶段实现。</p>
+<h3>新建</h3>
+<form method="post" action="/filters/create">
+  名称 <input name="name" required> 关键词 <input name="keywords"> 城市 <input name="city">
+  <button type="submit">保存</button>
+</form>
+<h3>已保存（保存的是查询条件，非结果快照）</h3>
+{% for f in filters %}
+<div style="border:1px solid #ccc; margin:8px 0; padding:8px">
+  <form method="post" action="/filters/{{ f.id }}/update" style="display:inline">
+    <input name="name" value="{{ f.name }}" required>
+    <input name="keywords" value="{{ f.keywords }}">
+    <input name="city" value="{{ f.city }}">
+    <button type="submit">更新</button>
+  </form>
+  <a href="/filters/{{ f.id }}/apply"><button>使用</button></a>
+  <form method="post" action="/filters/{{ f.id }}/delete" style="display:inline"><button type="submit">删除</button></form>
+</div>
+{% else %}
+<p>暂无筛选</p>
+{% endfor %}
 {% endblock %}

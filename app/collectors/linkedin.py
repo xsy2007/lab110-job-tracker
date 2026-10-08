@@ -45,4 +45,6 @@ class LinkedInCollector(BaseCollector):
                     source_url=href.split("?")[0],
                 )
             )
+        if not items:
+            raise RuntimeError("LinkedIn returned no jobs (bot redirect or no proxy?)")
         return CollectResult(items=items, raw=r.text)

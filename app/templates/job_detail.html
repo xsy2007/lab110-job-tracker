@@ -3,11 +3,18 @@
 {% block content %}
 <h2>{{ job.title }}</h2>
 <p><strong>公司：</strong>{{ job.company }} · <strong>城市：</strong>{{ job.city }} · <strong>状态：</strong>{{ job.status }}</p>
+<p><strong>截止：</strong>{% if job.deadline %}{{ job.deadline.strftime('%Y-%m-%d') }}{% else %}未提供{% endif %} · <strong>来源：</strong>{{ job.source.name }}</p>
 <p><strong>薪资：</strong>{{ job.salary or '—' }}</p>
-<p><strong>source_job_id：</strong>{{ job.source_job_id }}</p>
-<p><strong>来源：</strong><a href="{{ job.source_url }}" target="_blank">{{ job.source_url }}</a></p>
-<h3>要求</h3>
-<pre>{{ job.requirements or '—' }}</pre>
+<p><strong>原始来源：</strong><a href="{{ job.source_url }}" target="_blank">{{ job.source_url }}</a></p>
+<h3>要求（requirements）</h3>
+<pre>{{ job.requirements or '未提供' }}</pre>
 <h3>描述</h3>
 <pre>{{ job.description or '—' }}</pre>
+<p>
+{% if followed %}
+<form method="post" action="/jobs/{{ job.id }}/unfollow" style="display:inline"><button type="submit">取消关注</button></form>
+{% else %}
+<form method="post" action="/jobs/{{ job.id }}/follow" style="display:inline"><button type="submit">关注</button></form>
+{% endif %}
+</p>
 {% endblock %}

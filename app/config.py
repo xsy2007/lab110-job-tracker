@@ -1,6 +1,14 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # project root
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(BASE_DIR / ".env")
+except ImportError:
+    pass
+
 DATA_DIR = BASE_DIR / "data"
 EVIDENCE_DIR = BASE_DIR / "evidence"
 SNAPSHOTS_DIR = BASE_DIR / "snapshots"

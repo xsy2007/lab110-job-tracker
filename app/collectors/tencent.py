@@ -50,10 +50,12 @@ class TencentCollector(BaseCollector):
                     title=(p.get("RecruitPostName") or "").strip(),
                     company=(p.get("ComName") or "").strip() or "腾讯",
                     city=(p.get("LocationName") or "").strip(),
-                    source_url=(p.get("PostURL") or "").strip(),
+                    source_url=(p.get("PostURL") or "").strip().replace("http://", "https://", 1),
                     description=(p.get("Responsibility") or "").strip(),
                     requirements=(p.get("RequireWorkYearsName") or "").strip(),
                     status="OPEN" if is_valid else "CLOSED",
                 )
             )
+        if not items:
+            raise RuntimeError("Tencent API returned no jobs")
         return CollectResult(items=items, raw=r.text)

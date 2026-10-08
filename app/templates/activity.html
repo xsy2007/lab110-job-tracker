@@ -2,5 +2,16 @@
 {% block title %}动态{% endblock %}
 {% block content %}
 <h2>动态</h2>
-<p>动态流将在后续阶段实现。</p>
+<ul>
+  {% for a in activities %}
+  <li>
+    [{{ a.created_at.strftime('%Y-%m-%d %H:%M') }}]
+    {% if a.activity_type == 'closed' %}岗位关闭{% elif a.activity_type == 'changed' %}岗位变化{% else %}{{ a.activity_type }}{% endif %}
+    {% if a.job_id %}（岗位 #{{ a.job_id }}）{% endif %}
+    <pre style="display:inline">{{ a.payload }}</pre>
+  </li>
+  {% else %}
+  <li>暂无动态</li>
+  {% endfor %}
+</ul>
 {% endblock %}
