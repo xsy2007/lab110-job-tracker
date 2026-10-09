@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
@@ -17,4 +19,12 @@ def activity_page(request: Request, db: Session = Depends(get_db), user: User = 
         .order_by(UserActivity.created_at.desc())
         .all()
     )
-    return templates.TemplateResponse(request, "activity.html", {"user": user, "activities": activities})
+    items = []
+    for a in activities:
+        try:
+            payload = json.loads(a.payload or "{}")
+        except Exception:
+            payload = {}
+        changes = [(k, v.get("before"), v.get("after")) for k, v in payload.items()]
+        items.append({"activity": a, "changes": changes})
+    return templates.TemplateResponse(request, "activity.html", {"user": user, "items": items})

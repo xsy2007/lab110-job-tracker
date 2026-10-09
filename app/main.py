@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from .config import SECRET_KEY
@@ -12,6 +15,7 @@ from .seed import seed_defaults
 def create_app() -> FastAPI:
     app = FastAPI(title="Lab110 Job Tracker")
     app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=7 * 24 * 3600)
+    app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 
     init_db()
     seed_defaults()

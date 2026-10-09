@@ -7,3 +7,4 @@ beautifulsoup4
 python-multipart
 itsdangerous
 python-dotenv
+quickjs

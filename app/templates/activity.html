@@ -1,17 +1,29 @@
 {% extends "base.html" %}
 {% block title %}动态{% endblock %}
 {% block content %}
-<h2>动态</h2>
-<ul>
-  {% for a in activities %}
-  <li>
-    [{{ a.created_at.strftime('%Y-%m-%d %H:%M') }}]
-    {% if a.activity_type == 'closed' %}岗位关闭{% elif a.activity_type == 'changed' %}岗位变化{% else %}{{ a.activity_type }}{% endif %}
-    {% if a.job_id %}（岗位 #{{ a.job_id }}）{% endif %}
-    <pre style="display:inline">{{ a.payload }}</pre>
-  </li>
-  {% else %}
-  <li>暂无动态</li>
+<h1>动态</h1>
+{% if items %}
+<div class="card">
+  {% for it in items %}
+  <div class="activity-item">
+    <div class="activity-head">
+      {% set a = it.activity %}
+      <span class="badge {% if a.activity_type == 'closed' %}badge-closed{% elif a.activity_type == 'changed' %}badge-open{% else %}badge-default{% endif %}">{{ a.activity_type }}</span>
+      {% if a.job_id %}<a href="/jobs/{{ a.job_id }}">岗位 #{{ a.job_id }}</a>{% endif %}
+      <span class="muted small">{{ a.created_at | dt }}</span>
+    </div>
+    {% for field, before, after in it.changes %}
+    <div class="change">
+      <span class="muted small">{{ field }}</span>
+      <span class="before">{{ before or '（空）' }}</span>
+      <span class="arrow">→</span>
+      <span class="after">{{ after or '（空）' }}</span>
+    </div>
+    {% endfor %}
+  </div>
   {% endfor %}
-</ul>
+</div>
+{% else %}
+<div class="empty">暂无动态</div>
+{% endif %}
 {% endblock %}

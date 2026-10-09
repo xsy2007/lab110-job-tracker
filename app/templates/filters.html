@@ -1,25 +1,31 @@
 {% extends "base.html" %}
 {% block title %}筛选{% endblock %}
 {% block content %}
-<h2>筛选条件</h2>
-<h3>新建</h3>
-<form method="post" action="/filters/create">
-  名称 <input name="name" required> 关键词 <input name="keywords"> 城市 <input name="city">
-  <button type="submit">保存</button>
-</form>
-<h3>已保存（保存的是查询条件，非结果快照）</h3>
+<h1>筛选条件</h1>
+<div class="card">
+  <h3>新建筛选</h3>
+  <form method="post" action="/filters/create" class="form">
+    <input name="name" placeholder="名称" required>
+    <input name="keywords" placeholder="关键词">
+    <input name="city" placeholder="城市">
+    <button type="submit" class="btn btn-primary">保存</button>
+  </form>
+</div>
+{% if filters %}
 {% for f in filters %}
-<div style="border:1px solid #ccc; margin:8px 0; padding:8px">
-  <form method="post" action="/filters/{{ f.id }}/update" style="display:inline">
+<div class="card">
+  <form method="post" action="/filters/{{ f.id }}/update" class="form">
     <input name="name" value="{{ f.name }}" required>
     <input name="keywords" value="{{ f.keywords }}">
     <input name="city" value="{{ f.city }}">
-    <button type="submit">更新</button>
+    <button type="submit" class="btn">更新</button>
+    <a href="/filters/{{ f.id }}/apply" class="btn btn-primary">使用</a>
+    <button type="submit" formmethod="post" formaction="/filters/{{ f.id }}/delete" class="btn btn-danger">删除</button>
   </form>
-  <a href="/filters/{{ f.id }}/apply"><button>使用</button></a>
-  <form method="post" action="/filters/{{ f.id }}/delete" style="display:inline"><button type="submit">删除</button></form>
+  <p class="muted small">保存的是查询条件（关键词 + 城市），非结果快照。</p>
 </div>
-{% else %}
-<p>暂无筛选</p>
 {% endfor %}
+{% else %}
+<div class="empty">暂无筛选</div>
+{% endif %}
 {% endblock %}

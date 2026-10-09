@@ -6,6 +6,7 @@ services:
       - "8000:8000"
     volumes:
       - jobtracker_data:/app/data
+      - ./evidence:/app/evidence
     environment:
       # Optional proxy, container-reachable (e.g. http://host.docker.internal:7890).
       # NOT the host's 127.0.0.1 (which points to the container itself).

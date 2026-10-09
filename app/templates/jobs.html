@@ -1,33 +1,42 @@
 {% extends "base.html" %}
 {% block title %}岗位{% endblock %}
 {% block content %}
-<h2>岗位列表</h2>
-<form method="get" action="/jobs">
+<h1>岗位列表</h1>
+<form method="get" action="/jobs" class="form">
   <input name="q" value="{{ q }}" placeholder="关键词">
   <input name="city" value="{{ city }}" placeholder="城市">
-  <button type="submit">搜索</button>
+  <button type="submit" class="btn btn-primary">搜索</button>
+  {% if q or city %}<a href="/jobs" class="btn">清除</a>{% endif %}
 </form>
-<table>
-  <tr><th>标题</th><th>公司</th><th>城市</th><th>状态</th><th>截止</th><th>来源</th><th>最近采集</th><th>操作</th></tr>
+{% if jobs %}
+<div style="overflow-x:auto;">
+<table class="table">
+  <thead>
+    <tr><th>标题</th><th>公司</th><th>城市</th><th>状态</th><th>截止</th><th>来源</th><th>最近采集</th><th>操作</th></tr>
+  </thead>
+  <tbody>
   {% for j in jobs %}
   <tr>
     <td><a href="/jobs/{{ j.id }}">{{ j.title }}</a></td>
     <td>{{ j.company }}</td>
     <td>{{ j.city }}</td>
-    <td>{{ j.status }}</td>
-    <td>{% if j.deadline %}{{ j.deadline.strftime('%Y-%m-%d') }}{% else %}未提供{% endif %}</td>
+    <td><span class="badge {{ j.status | badge }}">{{ j.status }}</span></td>
+    <td class="muted">{% if j.deadline %}{{ j.deadline | dt('%Y-%m-%d') }}{% else %}未提供{% endif %}</td>
     <td>{{ j.source.name }}</td>
-    <td>{{ j.last_seen_at.strftime('%Y-%m-%d %H:%M') }}</td>
+    <td class="muted small">{{ j.last_seen_at | dt }}</td>
     <td>
       {% if j.id in followed %}
-      <form method="post" action="/jobs/{{ j.id }}/unfollow" style="display:inline"><button type="submit">取消关注</button></form>
+      <form method="post" action="/jobs/{{ j.id }}/unfollow" class="inline-form"><button class="btn btn-sm btn-danger">取消关注</button></form>
       {% else %}
-      <form method="post" action="/jobs/{{ j.id }}/follow" style="display:inline"><button type="submit">关注</button></form>
+      <form method="post" action="/jobs/{{ j.id }}/follow" class="inline-form"><button class="btn btn-sm">关注</button></form>
       {% endif %}
     </td>
   </tr>
-  {% else %}
-  <tr><td colspan="8">暂无岗位（先运行采集）</td></tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
+{% else %}
+<div class="empty">暂无岗位（先运行采集）</div>
+{% endif %}
 {% endblock %}

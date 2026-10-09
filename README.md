@@ -4,11 +4,11 @@
 
 ## 1. 项目目标
 
-采集两个真实招聘来源的岗位（腾讯招聘官方 + LinkedIn 招聘平台），提供岗位搜索、筛选条件管理、岗位关注与变化动态；维护人员可手动触发采集；通过 playback 快照对变化检测逻辑做确定性验收。
+采集真实招聘来源的岗位（腾讯招聘官方 + 实习僧 + LinkedIn 招聘平台），提供岗位搜索、筛选条件管理、岗位关注与变化动态；维护人员可手动触发采集；通过 playback 快照对变化检测逻辑做确定性验收。
 
 ## 2. 架构与目录结构
 
-技术栈：Python 3.12 · FastAPI · Jinja2 · SQLAlchemy · SQLite · httpx · BeautifulSoup · pytest · Docker
+技术栈：Python 3.12 · FastAPI · Jinja2 · SQLAlchemy · SQLite · httpx · BeautifulSoup · quickjs · pytest · Docker
 
 ```
 app/
@@ -18,11 +18,11 @@ app/
   models.py         9 张表（users/sources/jobs/job_versions/saved_filters/
                     follows/job_changes/user_activities/collection_runs）
   security.py       PBKDF2 密码散列
-  seed.py           预置 user1/user2/maintainer + 两个来源
+  seed.py           预置 user1/user2/maintainer + 三个来源
   deps.py           登录依赖（未登录重定向 /login）
   routers/          auth / jobs / filters / follows / activity / maintenance
   services/         collection.py（采集+变更+动态）  playback.py（快照回放）
-  collectors/       base + tencent + linkedin
+  collectors/       base + tencent + shixiseng + linkedin
   templates/        Jinja2 页面
 data/              SQLite 数据库（volume 持久化，不入库）
 evidence/          真实采集原始响应 + 元数据（来源/时间/结果）
@@ -30,14 +30,17 @@ snapshots/         4 个 playback 快照（独立于真实数据）
 tests/             pytest 验收测试
 ```
 
-## 3. 两个真实来源及说明
+## 3. 三个真实来源及说明
 
 | 来源 | 类型 | 采集器 | 说明 |
 |---|---|---|---|
 | 腾讯招聘 careers.tencent.com | 大厂官方 | tencent | JSON API，无需登录 |
-| LinkedIn linkedin.com/jobs | 招聘平台 | linkedin | guest 岗位接口，无需登录 |
+| 实习僧 shixiseng.com | 招聘平台 | shixiseng | Nuxt SSR，无需登录（解析 `__NUXT__`） |
+| LinkedIn linkedin.com/jobs | 招聘平台 | linkedin | guest 岗位接口，部分网络需代理 |
 
-字段映射：腾讯 `PostId→source_job_id`、`RecruitPostName→title`、`LocationName→city`、`PostURL→source_url`（转 https）、`IsValid→status`；LinkedIn 由卡片解析 `jobPosting ID→source_job_id`、标题/公司/城市/URL。
+> **本次 fresh database 实际验收结果**：腾讯招聘 SUCCESS（15 岗位）、实习僧 SUCCESS（19 岗位）；LinkedIn 在当前网络因 `302 → linkedin.cn` 实际 **FAILED**，作为额外可选来源（需合法代理）。腾讯与实习僧为本次验收的稳定来源。
+
+字段映射：腾讯 `PostId→source_job_id`、`RecruitPostName→title`、`LocationName→city`、`PostURL→source_url`（转 https）、`IsValid→status`；实习僧 `uuid→source_job_id`、`name→title`、`cname→company`、`city`、`degree→requirements`、`minsalary/maxsalary→salary`；LinkedIn 由卡片解析 `jobPosting ID→source_job_id`、标题/公司/城市/URL。
 
 ## 4. 本地启动（需要 Python 3.12）
 
@@ -112,27 +115,32 @@ docker compose up -d
 # 重新登录：筛选、关注、历史动态仍在（data/ 挂到 volume）
 ```
 
+持久化方式：
+- `data/` → named volume `jobtracker_data`（数据库）
+- `evidence/` → bind mount `./evidence:/app/evidence`（采集证据直接落到宿主机 `./evidence`，down/up 后仍在）
+
 ## 16. evidence 目录说明
 
-- `evidence/<collector>/run_<id>.{json,html}` = 采集时的原始响应（逐字节）。
-- `evidence/<collector>/run_<id>.meta.json` = 来源 / 开始时间 / 结束时间 / 状态 / 计数。
+- `evidence/<collector>/<timestamp>_run_<id>_<token>.{json,html}` = 采集时的原始响应（逐字节）。文件名含时间戳 + run_id + 随机 token，fresh DB 重建（run_id 从 1 起）不会覆盖历史证据。
+- `evidence/<collector>/<timestamp>_run_<id>_<token>.meta.json` = source / captured_at / source_url / status / created·updated·unchanged·failed。
 - `evidence/linkedin_probe.html` = 来源探测时的原始 HTML（非采集成功证据）。
 
 ## 17. 真实采集与 playback 数据严格区分
 
-- 真实采集：来自 careers.tencent.com 与 linkedin.com，写入 `jobs` 表，原始响应存 `evidence/`。
+- 真实采集：来自腾讯招聘（careers.tencent.com）、实习僧（shixiseng.com）与 LinkedIn（linkedin.com），写入 `jobs` 表，原始响应存 `evidence/`。
 - playback：`snapshots/` 下的 4 个 JSON 快照，只在临时独立数据库运行，验证变化逻辑，不计入真实岗位。
 
 ## 18. 已知限制
 
-- **LinkedIn 网络/代理限制**：guest 接口在大陆网络下直连返回 302（被重定向/机器人检测），需合法可用的 HTTP/HTTPS 代理。代理完全可选，通过 `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` 环境变量或 `.env` 配置（见 `.env.example`），代码不硬编码代理地址。无代理时 LinkedIn 采集记 `FAILED`、保留旧数据、不影响腾讯来源。
-- 已提交的 `evidence/` 是历史采集记录；在无代理环境重新采集 LinkedIn 会 `FAILED`，不会冒充新采集成功。
-- `deadline` 在所选两个来源中均不可得，页面显示「未提供」，不做推测。
+- **LinkedIn 网络/区域限制**：guest 接口在部分网络（如中国大陆）直连会返回 `302` 并重定向到 `linkedin.cn`，导致采集 `FAILED`。这**不是所有网络都会发生**，需经合法可用的 HTTP/HTTPS 代理才能稳定获取。代理完全可选，通过 `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY`（本地）或 `LAB110_PROXY`（Docker）环境变量/`.env` 配置（见 `.env.example`），代码不硬编码代理地址。无代理时 LinkedIn 采集记 `FAILED`、保留旧数据、不影响腾讯与实习僧来源。**不声称 LinkedIn 在所有网络环境都 SUCCESS**。
+- **实习僧（shixiseng）**：依赖其 Nuxt SSR 的 `__NUXT__` 载荷结构。解析器用 `quickjs` **仅执行提取出的最小 `__NUXT__` 赋值片段**（设 10s CPU / 128MiB 内存上限），不执行页面任何其他脚本或内联 JS；若站点改版导致结构变化，需同步调整解析器。
+- 仓库中保留的早期 evidence（含历史 LinkedIn SUCCESS 记录）是**历史采集记录**，不代表当前 fresh database 结果；在无代理环境重新采集 LinkedIn 会 `FAILED`，不会冒充新采集成功。
+- `deadline` 在所选来源中均不可得，页面显示「未提供」，不做推测。
 
 ## 19. 关键验收场景及实际结果
 
-1. **真实采集**：腾讯 15 岗位、LinkedIn 10 岗位；首次采集 0 条 job_change。
-2. **采集幂等**：相同数据重复采集 unchanged=15/10，job_change 总数保持 0。
+1. **真实采集（fresh database）**：腾讯招聘 SUCCESS=15、实习僧 SUCCESS=19、LinkedIn FAILED（`302 → linkedin.cn`，单来源失败隔离正常）；总岗位 34；首次采集 0 条 job_change。满足官方来源 ≥10（15）、招聘平台 ≥10（19）、总计 ≥20（34）。
+2. **采集幂等**：相同数据重复采集 unchanged 与首次 created 一致，job_change 总数保持 0。
 3. **关注动态时序**（pytest）：关注前变化不补发；关注期间变化生成 activity；取关后不再生成、历史保留。
 4. **数据隔离**（pytest + HTTP 实测）：user1 的筛选/关注/动态，user2 不可见。
 5. **playback 四场景**（pytest）：baseline 0 change；requirements_changed 有 before/after；explicit_closed 仅显式关闭；source_timeout 不关闭任何岗位。
@@ -140,4 +148,4 @@ docker compose up -d
 
 ## 20. 声明
 
-上述「实际结果」均为本机实际执行得到（pytest 9/9 通过、真实采集 15+10、重复采集 0 change、隔离与 playback 均实测）。未验证的内容不写入「实际结果」。
+上述「实际结果」均为本机实际执行得到（pytest 18/18 通过、fresh database 真实采集腾讯 15 + 实习僧 19 = 34、LinkedIn 当前环境 FAILED 且单来源失败隔离正常、重复采集 0 change、隔离与 playback 均实测）。未验证的内容不写入「实际结果」。

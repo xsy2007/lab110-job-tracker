@@ -42,3 +42,24 @@ def db(session_factory):
     s.commit()
     yield s
     s.close()
+
+
+@pytest.fixture
+def client(session_factory, db):
+    """TestClient wired to the isolated test database."""
+    from fastapi.testclient import TestClient
+
+    from app.db import get_db
+    from app.main import app
+
+    def override_get_db():
+        s = session_factory()
+        try:
+            yield s
+        finally:
+            s.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    c = TestClient(app)
+    yield c
+    app.dependency_overrides.clear()

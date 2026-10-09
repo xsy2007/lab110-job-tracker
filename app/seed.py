@@ -8,9 +8,10 @@ _DEFAULT_USERS = [
     ("maintainer", "maintainer", "maintainer"),
 ]
 
-# One real big-company official site + one real public recruitment platform.
+# One real big-company official site + two real public recruitment platforms.
 _DEFAULT_SOURCES = [
     ("腾讯招聘", "company", "https://careers.tencent.com", "tencent"),
+    ("实习僧", "platform", "https://www.shixiseng.com/interns", "shixiseng"),
     ("LinkedIn", "platform", "https://www.linkedin.com/jobs", "linkedin"),
 ]
 

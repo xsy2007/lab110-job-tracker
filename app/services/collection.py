@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime, timezone
 
 from ..collectors import get_collector
@@ -19,25 +20,34 @@ def _fmt(value) -> str:
     return str(value)
 
 
-def _write_meta(source, run) -> None:
-    """Persist source + time + result metadata alongside the raw evidence."""
+def _ts(run) -> str:
+    return (run.started_at or _now()).strftime("%Y%m%dT%H%M%SZ")
+
+
+def _evidence_path(source, run, suffix: str):
+    """Unique evidence path: timestamp + run_id + random token, so a fresh DB
+    (whose run_id restarts at 1) can never overwrite a historical file."""
     evidence_dir = EVIDENCE_DIR / source.collector
     evidence_dir.mkdir(parents=True, exist_ok=True)
+    token = uuid.uuid4().hex[:8]
+    return evidence_dir / f"{_ts(run)}_run_{run.id}_{token}.{suffix}"
+
+
+def _write_meta(source, run) -> None:
+    captured = run.finished_at or run.started_at
     meta = {
-        "run_id": run.id,
-        "source_id": source.id,
         "source": source.name,
-        "collector": source.collector,
-        "started_at": run.started_at.isoformat() if run.started_at else None,
-        "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+        "captured_at": captured.isoformat() if captured else None,
+        "source_url": source.base_url,
         "status": run.status,
         "created": run.created_count,
         "updated": run.updated_count,
         "unchanged": run.unchanged_count,
         "failed": run.failed_count,
+        "run_id": run.id,
         "error": run.error_message,
     }
-    (evidence_dir / f"run_{run.id}.meta.json").write_text(
+    _evidence_path(source, run, "meta.json").write_text(
         json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
@@ -192,10 +202,8 @@ def run_collection(source_id: int, session_factory=SessionLocal) -> CollectionRu
             return run
 
         # Evidence: raw response body, byte-for-byte, unmodified.
-        evidence_dir = EVIDENCE_DIR / source.collector
-        evidence_dir.mkdir(parents=True, exist_ok=True)
         ext = "json" if source.collector == "tencent" else "html"
-        (evidence_dir / f"run_{run.id}.{ext}").write_text(result.raw, encoding="utf-8")
+        _evidence_path(source, run, ext).write_text(result.raw, encoding="utf-8")
 
         created, updated, unchanged, failed = apply_items(db, run, result.items)
 

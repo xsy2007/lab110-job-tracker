@@ -1,10 +1,12 @@
 from .base import BaseCollector, CollectResult, JobItem
 from .linkedin import LinkedInCollector
+from .shixiseng import ShixisengCollector
 from .tencent import TencentCollector
 
 REGISTRY = {
     "tencent": TencentCollector,
     "linkedin": LinkedInCollector,
+    "shixiseng": ShixisengCollector,
 }
 
 

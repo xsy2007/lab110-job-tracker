@@ -1,0 +1,12 @@
+{
+  "source": "LinkedIn",
+  "captured_at": "2026-10-09T10:26:19.177129",
+  "source_url": "https://www.linkedin.com/jobs",
+  "status": "FAILED",
+  "created": 0,
+  "updated": 0,
+  "unchanged": 0,
+  "failed": 0,
+  "run_id": 3,
+  "error": "HTTPStatusError: Redirect response '302 Found' for url 'https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=software+engineer&location=China&start=0'\nRedirect location: 'https://www.linkedin.cn/incareer/home'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302"
+}

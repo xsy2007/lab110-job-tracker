@@ -1,36 +1,49 @@
 {% extends "base.html" %}
 {% block title %}维护{% endblock %}
 {% block content %}
-<h2>维护</h2>
-<h3>来源</h3>
-<form method="post" action="/maintenance/collect-all" style="margin-bottom:8px">
-  <button type="submit">全部采集</button>
-</form>
-<table>
-  <tr><th>ID</th><th>名称</th><th>类型</th><th>采集器</th><th>操作</th></tr>
+<h1>维护</h1>
+<h2>来源</h2>
+<div class="grid">
   {% for s in sources %}
-  <tr>
-    <td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.kind }}</td><td>{{ s.collector }}</td>
-    <td><form method="post" action="/maintenance/collect/{{ s.id }}" style="display:inline"><button type="submit">立即采集</button></form></td>
-  </tr>
+  <div class="card">
+    <h3>{{ s.name }}</h3>
+    <p class="muted small">{{ s.kind }} · {{ s.collector }}</p>
+    <form method="post" action="/maintenance/collect/{{ s.id }}" class="inline-form">
+      <button class="btn btn-primary">立即采集</button>
+    </form>
+  </div>
   {% endfor %}
-</table>
-<h3>最近采集运行</h3>
-<table>
-  <tr><th>ID</th><th>来源</th><th>状态</th><th>开始</th><th>结束</th><th>created</th><th>updated</th><th>unchanged</th><th>failed</th><th>error</th></tr>
+</div>
+<form method="post" action="/maintenance/collect-all" style="margin-bottom:16px;">
+  <button class="btn btn-primary">全部采集</button>
+</form>
+
+<h2>最近采集运行</h2>
+<div style="overflow-x:auto;">
+<table class="table">
+  <thead>
+    <tr><th>ID</th><th>来源</th><th>状态</th><th>开始</th><th>结束</th><th>created</th><th>updated</th><th>unchanged</th><th>failed</th><th>error</th></tr>
+  </thead>
+  <tbody>
   {% for r in runs %}
   <tr>
     <td>{{ r.id }}</td>
     <td>{{ source_names.get(r.source_id, r.source_id) }}</td>
-    <td>{{ r.status }}</td>
-    <td>{{ r.started_at.strftime('%m-%d %H:%M:%S') }}</td>
-    <td>{% if r.finished_at %}{{ r.finished_at.strftime('%m-%d %H:%M:%S') }}{% else %}—{% endif %}</td>
-    <td>{{ r.created_count }}</td>
-    <td>{{ r.updated_count }}</td>
-    <td>{{ r.unchanged_count }}</td>
-    <td>{{ r.failed_count }}</td>
-    <td>{{ r.error_message or '' }}</td>
+    <td><span class="badge {{ r.status | badge }}">{{ r.status }}</span></td>
+    <td class="small">{{ r.started_at | dt }}</td>
+    <td class="small">{{ r.finished_at | dt }}</td>
+    <td class="count">{{ r.created_count }}</td>
+    <td class="count">{{ r.updated_count }}</td>
+    <td class="count">{{ r.unchanged_count }}</td>
+    <td class="count">{{ r.failed_count }}</td>
+    <td>
+      {% if r.error_message %}
+      <details><summary>查看错误</summary><pre class="err-text">{{ r.error_message }}</pre></details>
+      {% else %}—{% endif %}
+    </td>
   </tr>
   {% endfor %}
+  </tbody>
 </table>
+</div>
 {% endblock %}

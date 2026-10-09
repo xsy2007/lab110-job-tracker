@@ -2,33 +2,32 @@
 <html lang="zh">
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}Lab110 Job Tracker{% endblock %}</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; }
-    nav a { margin-right: 1rem; }
-    .error { color: #c00; }
-    table { border-collapse: collapse; }
-    td, th { border: 1px solid #ccc; padding: 4px 8px; }
-    pre { white-space: pre-wrap; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}岗位追踪{% endblock %}</title>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <nav>
-    <a href="/jobs">岗位</a>
-    <a href="/filters">筛选</a>
-    <a href="/follows">关注</a>
-    <a href="/activity">动态</a>
-    {% if user and user.role == 'maintainer' %}
-    <a href="/maintenance">维护</a>
-    {% endif %}
-    {% if user %}
-      <span>当前用户：{{ user.username }} ({{ user.role }})</span>
-      <a href="/logout">退出</a>
-    {% else %}
-      <a href="/login">登录</a>
-    {% endif %}
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/jobs">岗位追踪</a>
+      <a href="/jobs">岗位</a>
+      <a href="/filters">筛选</a>
+      <a href="/follows">关注</a>
+      <a href="/activity">动态</a>
+      {% if user and user.role == 'maintainer' %}
+      <a href="/maintenance">维护</a>
+      {% endif %}
+      <span class="user">
+        {% if user %}
+          {{ user.username }}（{{ user.role }}） · <a href="/logout">退出</a>
+        {% else %}
+          <a href="/login">登录</a>
+        {% endif %}
+      </span>
+    </div>
   </nav>
-  <hr>
-  {% block content %}{% endblock %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 </body>
 </html>

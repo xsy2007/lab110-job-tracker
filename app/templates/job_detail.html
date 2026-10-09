@@ -1,20 +1,29 @@
 {% extends "base.html" %}
 {% block title %}{{ job.title }}{% endblock %}
 {% block content %}
-<h2>{{ job.title }}</h2>
-<p><strong>公司：</strong>{{ job.company }} · <strong>城市：</strong>{{ job.city }} · <strong>状态：</strong>{{ job.status }}</p>
-<p><strong>截止：</strong>{% if job.deadline %}{{ job.deadline.strftime('%Y-%m-%d') }}{% else %}未提供{% endif %} · <strong>来源：</strong>{{ job.source.name }}</p>
-<p><strong>薪资：</strong>{{ job.salary or '—' }}</p>
-<p><strong>原始来源：</strong><a href="{{ job.source_url }}" target="_blank">{{ job.source_url }}</a></p>
-<h3>要求（requirements）</h3>
-<pre>{{ job.requirements or '未提供' }}</pre>
-<h3>描述</h3>
-<pre>{{ job.description or '—' }}</pre>
+<h1>{{ job.title }}</h1>
+<div class="job-meta">
+  <span><strong>公司：</strong>{{ job.company }}</span>
+  <span><strong>城市：</strong>{{ job.city }}</span>
+  <span><strong>状态：</strong><span class="badge {{ job.status | badge }}">{{ job.status }}</span></span>
+  <span><strong>截止：</strong>{% if job.deadline %}{{ job.deadline | dt('%Y-%m-%d') }}{% else %}未提供{% endif %}</span>
+  <span><strong>薪资：</strong>{{ job.salary or '—' }}</span>
+  <span><strong>来源：</strong>{{ job.source.name }}</span>
+</div>
+<p><a href="{{ job.source_url }}" target="_blank" rel="noopener">查看原始来源 ↗</a></p>
+<div class="card">
+  <h3>要求（requirements）</h3>
+  <pre>{{ job.requirements or '未提供' }}</pre>
+</div>
+<div class="card">
+  <h3>描述</h3>
+  <pre>{{ job.description or '—' }}</pre>
+</div>
 <p>
-{% if followed %}
-<form method="post" action="/jobs/{{ job.id }}/unfollow" style="display:inline"><button type="submit">取消关注</button></form>
-{% else %}
-<form method="post" action="/jobs/{{ job.id }}/follow" style="display:inline"><button type="submit">关注</button></form>
-{% endif %}
+  {% if followed %}
+  <form method="post" action="/jobs/{{ job.id }}/unfollow" class="inline-form"><button class="btn btn-danger">取消关注</button></form>
+  {% else %}
+  <form method="post" action="/jobs/{{ job.id }}/follow" class="inline-form"><button class="btn btn-primary">关注</button></form>
+  {% endif %}
 </p>
 {% endblock %}

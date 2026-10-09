@@ -13,6 +13,7 @@ dependencies = [
     "python-multipart",
     "itsdangerous",
     "python-dotenv",
+    "quickjs",
 ]
 
 [project.optional-dependencies]
